@@ -282,6 +282,13 @@ export default function DriverDashboard() {
                           </div>
                         </div>
                       )}
+                      
+                      {ride.fare && (
+                        <div className="mt-4 pt-4 border-t border-white/10 flex items-center justify-between">
+                          <span className="text-xs text-slate-400 uppercase tracking-widest font-bold">Estimated Fare</span>
+                          <span className="text-xl font-black text-emerald-400">₹{ride.fare}</span>
+                        </div>
+                      )}
                     </div>
                     <div className="flex flex-col gap-3 w-full md:w-auto min-w-[160px]">
                       <button 
@@ -389,7 +396,7 @@ export default function DriverDashboard() {
                             </div>
                           </td>
                           <td className="py-5 text-sm font-medium text-white">{ride.passenger?.name || 'Unknown'}</td>
-                          <td className="py-5 text-sm font-bold text-emerald-300">₹{ride.fare || 150}</td>
+                          <td className="py-5 text-sm font-bold text-emerald-300">₹{ride.fare || 0}</td>
                           <td className="py-5">
                             {ride.feedback ? (
                               <div className="flex items-center gap-1 bg-amber-500/10 px-3 py-1 rounded-full border border-amber-500/20 inline-flex">

@@ -207,6 +207,20 @@ export function initializeSockets(io: Server) {
         
         const status = scheduledAt ? 'SCHEDULED' : 'REQUESTED';
 
+        // Calculate Fare: Distance in km * 10 (minimum ₹20)
+        let calculatedFare = 50; // default fallback
+        if (pickupLat && pickupLng && dropoffLat && dropoffLng) {
+          const R = 6371e3;
+          const p1 = pickupLat * Math.PI / 180;
+          const p2 = dropoffLat * Math.PI / 180;
+          const dp = (dropoffLat - pickupLat) * Math.PI / 180;
+          const dl = (dropoffLng - pickupLng) * Math.PI / 180;
+          const a = Math.sin(dp / 2) * Math.sin(dp / 2) + Math.cos(p1) * Math.cos(p2) * Math.sin(dl / 2) * Math.sin(dl / 2);
+          const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+          const distanceMeters = R * c;
+          calculatedFare = Math.max(20, Math.round((distanceMeters / 1000) * 10));
+        }
+
         const ride = await prisma.ride.create({
           data: {
             passengerId: user.id,
@@ -216,6 +230,7 @@ export function initializeSockets(io: Server) {
             dropLocation: dropoffLocation,
             dropLat: dropoffLat,
             dropLng: dropoffLng,
+            fare: calculatedFare,
             scheduledAt: scheduledAt ? new Date(scheduledAt) : null,
             status
           },

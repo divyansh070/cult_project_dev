@@ -300,9 +300,10 @@ export default function PassengerDashboard() {
                         <p className="text-sm font-bold text-amber-300/70 uppercase tracking-[0.2em] mb-4">
                           {new Date(ride.scheduledAt).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}
                         </p>
-                        <p className="text-sm font-medium text-amber-100 mb-6 bg-amber-500/10 inline-block px-4 py-2 rounded-full border border-amber-500/20">
+                        <p className="text-sm font-medium text-amber-100 mb-4 bg-amber-500/10 inline-block px-4 py-2 rounded-full border border-amber-500/20">
                           {ride.pickupLocation} <span className="mx-2 text-white/30">&rarr;</span> {ride.dropLocation}
                         </p>
+                        {ride.fare && <p className="text-xl font-black text-emerald-400 mb-6">Fare: ₹{ride.fare}</p>}
                         <p className="text-xs text-white/40 mb-6">Waiting for a driver to accept it...</p>
                         <button 
                           onClick={() => handleCancelRide(ride.id)}
@@ -320,9 +321,10 @@ export default function PassengerDashboard() {
                           </div>
                         </div>
                         <h2 className="text-3xl font-black text-white mb-2 tracking-tight">Broadcasting...</h2>
-                        <p className="text-sm font-medium text-indigo-200 mb-6 bg-black/20 inline-block px-4 py-2 rounded-full border border-white/5">
+                        <p className="text-sm font-medium text-indigo-200 mb-4 bg-black/20 inline-block px-4 py-2 rounded-full border border-white/5">
                           {ride.pickupLocation} <span className="mx-2 text-white/30">&rarr;</span> {ride.dropLocation}
                         </p>
+                        {ride.fare && <p className="text-xl font-black text-emerald-400 mb-6">Estimated Fare: ₹{ride.fare}</p>}
                         <button 
                           onClick={() => handleCancelRide(ride.id)}
                           className="px-6 py-2 bg-rose-500/10 text-rose-400 border border-rose-500/30 rounded-xl font-bold hover:bg-rose-500/20 transition-all text-sm"
@@ -374,11 +376,13 @@ export default function PassengerDashboard() {
                             const distanceText = distanceMeters ? (distanceMeters > 1000 ? `${(distanceMeters/1000).toFixed(1)} km away` : `${Math.round(distanceMeters)}m away`) : 'Locating...';
                             
                             return (
-                              <p className="text-sm text-emerald-100 mb-6 font-medium bg-emerald-500/10 inline-block px-4 py-2 rounded-full border border-emerald-500/20">
+                              <p className="text-sm text-emerald-100 mb-4 font-medium bg-emerald-500/10 inline-block px-4 py-2 rounded-full border border-emerald-500/20">
                                 En route to {ride.pickupLocation} • <span className="font-bold text-emerald-300">{distanceText}</span>
                               </p>
                             );
                           })()}
+                          
+                          {ride.fare && <p className="text-2xl font-black text-emerald-400 mb-6">Fare: ₹{ride.fare}</p>}
                           
                           <div className="bg-black/30 backdrop-blur-md border border-white/10 rounded-3xl p-6 flex flex-col sm:flex-row items-center justify-between gap-4 w-full relative overflow-hidden">
                             <div className="absolute top-0 left-0 w-2 h-full bg-emerald-500"></div>
