@@ -1,9 +1,8 @@
 'use client';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import L from 'leaflet';
 import 'leaflet-routing-machine';
-import 'leaflet-routing-machine/dist/leaflet-routing-machine.css';
-import { useMap } from 'react-leaflet';
+import { Polyline } from 'react-leaflet';
 
 interface RoutingMachineProps {
   start: [number, number];
@@ -11,38 +10,32 @@ interface RoutingMachineProps {
 }
 
 export default function RoutingMachine({ start, end }: RoutingMachineProps) {
-  const map = useMap();
+  const [routeCoords, setRouteCoords] = useState<[number, number][]>([]);
 
   useEffect(() => {
-    if (!map) return;
-
-    // Remove any existing routing control if this rerenders
-    const routingControl = L.Routing.control({
-      waypoints: [
-        L.latLng(start[0], start[1]),
-        L.latLng(end[0], end[1])
-      ],
-      lineOptions: {
-        styles: [{ color: "#6366f1", weight: 6, opacity: 0.8 }],
-        extendToWaypoints: true,
-        missingRouteTolerance: 0
-      },
-      show: false, // Hide the turn-by-turn itinerary panel
-      addWaypoints: false,
-      routeWhileDragging: false,
-      fitSelectedRoutes: true,
-      showAlternatives: false,
-      createMarker: () => null // We'll render our own markers
-    }).addTo(map);
-
-    return () => {
-      try {
-        map.removeControl(routingControl);
-      } catch (e) {
-        // Ignore removal errors if map is already unmounted
+    // Create a headless OSRM router
+    const router = L.Routing.osrmv1();
+    
+    router.route([
+      L.Routing.waypoint(L.latLng(start[0], start[1])),
+      L.Routing.waypoint(L.latLng(end[0], end[1]))
+    ], (err: any, routes: any) => {
+      if (!err && routes && routes.length > 0) {
+        const coords = routes[0].coordinates.map((c: any) => [c.lat, c.lng]);
+        setRouteCoords(coords);
       }
-    };
-  }, [map, start, end]);
+    });
+  }, [start, end]);
 
-  return null;
+  if (routeCoords.length === 0) return null;
+
+  return (
+    <Polyline 
+      positions={routeCoords} 
+      color="#6366f1" 
+      weight={6} 
+      opacity={0.8}
+      pathOptions={{ lineCap: 'round', lineJoin: 'round' }}
+    />
+  );
 }
