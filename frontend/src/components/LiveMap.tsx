@@ -41,13 +41,32 @@ const dropoffIcon = new L.Icon({
 
 const IITR_CENTER: [number, number] = [29.8649, 77.8966];
 
+function MapController({ center }: { center: [number, number] }) {
+  const map = useMap();
+  useEffect(() => {
+    map.flyTo(center, map.getZoom());
+  }, [center, map]);
+  return null;
+}
+
 export default function LiveMap() {
   const { driverLocations, activeRides } = useSocketStore();
   const { user } = useAuthStore();
   const [mounted, setMounted] = useState(false);
+  const [center, setCenter] = useState<[number, number]>(IITR_CENTER);
 
   useEffect(() => {
     setMounted(true);
+    if ('geolocation' in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setCenter([position.coords.latitude, position.coords.longitude]);
+        },
+        (error) => {
+          console.warn('Geolocation failed, falling back to default center.', error);
+        }
+      );
+    }
   }, []);
 
   if (!mounted) return <div className="w-full h-full bg-slate-900 animate-pulse rounded-[2rem]"></div>;
@@ -55,11 +74,12 @@ export default function LiveMap() {
   return (
     <div className="w-full h-full relative rounded-[2rem] overflow-hidden border border-white/10 shadow-2xl">
       <MapContainer 
-        center={IITR_CENTER} 
+        center={center} 
         zoom={15} 
         className="w-full h-full z-0"
         zoomControl={false}
       >
+        <MapController center={center} />
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
           url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"

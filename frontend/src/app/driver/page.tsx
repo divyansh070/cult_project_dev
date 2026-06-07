@@ -6,10 +6,11 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { LogOut, Car, Power, PowerOff, MapPin, CheckCircle, Navigation, Loader2, Sparkles, Star, TrendingUp, History, IndianRupee, Activity } from 'lucide-react';
 import MapWrapper from '@/components/MapWrapper';
+import L from 'leaflet';
 
 export default function DriverDashboard() {
   const { user, token, logout, isAuthenticated } = useAuthStore();
-  const { connect, disconnect, isConnected, incomingRides, activeRides, driverStats, addActiveRide, removeActiveRide } = useSocketStore();
+  const { connect, disconnect, isConnected, incomingRides, activeRides, driverStats, addActiveRide, removeActiveRide, driverLocations } = useSocketStore();
   const router = useRouter();
   
   const [isOnline, setIsOnline] = useState(false);
@@ -131,10 +132,19 @@ export default function DriverDashboard() {
                     <div className={`${ride.scheduledAt ? 'bg-amber-500 shadow-[0_0_20px_rgba(251,191,36,0.5)]' : 'bg-emerald-500 shadow-[0_0_20px_rgba(52,211,153,0.5)]'} w-16 h-16 rounded-2xl flex items-center justify-center`}>
                       {ride.scheduledAt ? <Navigation className="w-8 h-8 text-white" /> : <CheckCircle className="w-8 h-8 text-white" />}
                     </div>
-                    <div className={`${ride.scheduledAt ? 'bg-amber-500/20 border-amber-500/30' : 'bg-emerald-500/20 border-emerald-500/30'} border px-4 py-2 rounded-full`}>
+                    <div className={`${ride.scheduledAt ? 'bg-amber-500/20 border-amber-500/30' : 'bg-emerald-500/20 border-emerald-500/30'} border px-4 py-2 rounded-full flex flex-col items-end`}>
                       <span className={`${ride.scheduledAt ? 'text-amber-300' : 'text-emerald-300'} text-xs font-bold uppercase tracking-wider ${!ride.scheduledAt && 'animate-pulse'}`}>
                         {ride.scheduledAt ? `UPCOMING: ${new Date(ride.scheduledAt).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}` : 'In Progress'}
                       </span>
+                      {!ride.scheduledAt && (() => {
+                        const myLoc = driverLocations[user.id];
+                        const distanceMeters = myLoc && ride.pickupLat && ride.pickupLng 
+                          ? L.latLng(myLoc.lat, myLoc.lng).distanceTo(L.latLng(ride.pickupLat, ride.pickupLng)) 
+                          : null;
+                        const distanceText = distanceMeters ? (distanceMeters > 1000 ? `${(distanceMeters/1000).toFixed(1)} km to pickup` : `${Math.round(distanceMeters)}m to pickup`) : '';
+                        
+                        return distanceText ? <span className="text-[10px] text-emerald-200 font-medium">{distanceText}</span> : null;
+                      })()}
                     </div>
                   </div>
                   

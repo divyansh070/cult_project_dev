@@ -6,10 +6,12 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { LogOut, MapPin, Navigation, Loader2, CheckCircle2, CarFront, Star, Sparkles } from 'lucide-react';
 import MapWrapper from '@/components/MapWrapper';
+import toast from 'react-hot-toast';
+import L from 'leaflet';
 
 export default function PassengerDashboard() {
   const { user, token, logout, isAuthenticated } = useAuthStore();
-  const { connect, disconnect, isConnected, onlineDrivers, activeRides, addActiveRide, removeActiveRide } = useSocketStore();
+  const { connect, disconnect, isConnected, onlineDrivers, activeRides, addActiveRide, removeActiveRide, driverLocations } = useSocketStore();
   const router = useRouter();
 
   const [pickup, setPickup] = useState('');
@@ -352,9 +354,20 @@ export default function PassengerDashboard() {
                         </div>
                         <div className="flex-1 text-center md:text-left w-full">
                           <h2 className="text-3xl font-black text-white mb-2 tracking-tight">Driver Assigned!</h2>
-                          <p className="text-sm text-emerald-100 mb-6 font-medium bg-emerald-500/10 inline-block px-4 py-2 rounded-full border border-emerald-500/20">
-                            En route to {ride.pickupLocation}
-                          </p>
+                          
+                          {(() => {
+                            const driverLoc = driverLocations[ride.driverId];
+                            const distanceMeters = driverLoc && ride.pickupLat && ride.pickupLng 
+                              ? L.latLng(driverLoc.lat, driverLoc.lng).distanceTo(L.latLng(ride.pickupLat, ride.pickupLng)) 
+                              : null;
+                            const distanceText = distanceMeters ? (distanceMeters > 1000 ? `${(distanceMeters/1000).toFixed(1)} km away` : `${Math.round(distanceMeters)}m away`) : 'Locating...';
+                            
+                            return (
+                              <p className="text-sm text-emerald-100 mb-6 font-medium bg-emerald-500/10 inline-block px-4 py-2 rounded-full border border-emerald-500/20">
+                                En route to {ride.pickupLocation} • <span className="font-bold text-emerald-300">{distanceText}</span>
+                              </p>
+                            );
+                          })()}
                           
                           <div className="bg-black/30 backdrop-blur-md border border-white/10 rounded-3xl p-6 flex flex-col sm:flex-row items-center justify-between gap-4 w-full relative overflow-hidden">
                             <div className="absolute top-0 left-0 w-2 h-full bg-emerald-500"></div>
