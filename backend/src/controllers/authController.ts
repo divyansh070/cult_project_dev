@@ -3,6 +3,7 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import User from '../models/User';
 import Ride from '../models/Ride';
+import Feedback from '../models/Feedback';
 import { AuthRequest } from '../middleware/authMiddleware';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'secret123';
@@ -147,17 +148,15 @@ export const getPassengerHistory = async (req: AuthRequest, res: Response): Prom
       .populate('driver', 'name phone');
 
     // We also need feedback for each ride. Let's do an aggregate or manual mapping.
-    const mongoose = require('mongoose');
-    const Feedback = mongoose.models.Feedback || mongoose.model('Feedback');
-    
     const historyIds = history.map(h => h._id);
     const feedbacks = await Feedback.find({ rideId: { $in: historyIds } });
 
     const result = history.map(h => {
-      const fb = feedbacks.find((f: any) => f.rideId.toString() === h.id);
+      const fb = feedbacks.find((f: any) => f.rideId.toString() === h._id.toString());
       const hObj = h.toObject();
       return {
         ...hObj,
+        id: h._id.toString(),
         feedback: fb ? { rating: fb.rating, comment: fb.comment } : null
       };
     });

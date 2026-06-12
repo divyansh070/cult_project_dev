@@ -190,9 +190,10 @@ export const useSocketStore = create<SocketState>((set) => ({
       }));
     });
 
-    socket.on('ride_accepted', (data: Ride) => {
+    socket.on('ride_accepted', (data: any) => {
+      const rideId = data.id || data._id;
       set((state) => ({
-        activeRides: state.activeRides.map(r => r.id === data.id ? { ...r, ...data, status: 'ACCEPTED' } : r)
+        activeRides: state.activeRides.map(r => (r.id === rideId || (r as any)._id === rideId) ? { ...r, ...data, status: 'ACCEPTED', id: rideId } : r)
       }));
       toast.success('A driver has accepted your ride!', { icon: '🚘' });
       
@@ -202,9 +203,10 @@ export const useSocketStore = create<SocketState>((set) => ({
       }));
     });
 
-    socket.on('driver_cancelled_rebooking', (data: Ride) => {
+    socket.on('driver_cancelled_rebooking', (data: any) => {
+      const rideId = data.id || data._id;
       set((state) => ({
-        activeRides: state.activeRides.map(r => r.id === data.id ? { ...r, status: 'REQUESTED', driverId: undefined, driver: undefined } : r)
+        activeRides: state.activeRides.map(r => (r.id === rideId || (r as any)._id === rideId) ? { ...r, status: 'REQUESTED', driverId: undefined, driver: undefined } : r)
       }));
       toast.error('The assigned driver had to cancel. We are searching for a new driver!', { icon: '🔄', duration: 5000 });
       set((state) => ({
@@ -222,9 +224,10 @@ export const useSocketStore = create<SocketState>((set) => ({
       }));
     });
 
-    socket.on('ride_arrived', (data: Ride) => {
+    socket.on('driver_arrived', (data: any) => {
+      const rideId = data.id || data._id;
       set((state) => ({
-        activeRides: state.activeRides.map(r => r.id === data.id ? { ...r, ...data, status: 'ARRIVED' } : r)
+        activeRides: state.activeRides.map(r => (r.id === rideId || (r as any)._id === rideId) ? { ...r, ...data, status: 'ARRIVED' } : r)
       }));
       toast.success('Your driver has arrived!', { icon: '📍' });
 
@@ -234,9 +237,10 @@ export const useSocketStore = create<SocketState>((set) => ({
       }));
     });
 
-    socket.on('ride_started', (data: Ride) => {
+    socket.on('ride_started', (data: any) => {
+      const rideId = data.id || data._id;
       set((state) => ({
-        activeRides: state.activeRides.map(r => r.id === data.id ? { ...r, ...data, status: 'IN_PROGRESS' } : r)
+        activeRides: state.activeRides.map(r => (r.id === rideId || (r as any)._id === rideId) ? { ...r, ...data, status: 'IN_PROGRESS' } : r)
       }));
       toast.success('Your trip has started!', { icon: '🚀' });
 
@@ -246,9 +250,10 @@ export const useSocketStore = create<SocketState>((set) => ({
       }));
     });
 
-    socket.on('ride_completed', (data: Ride) => {
+    socket.on('ride_completed', (data: any) => {
+      const rideId = data.id || data._id;
       set((state) => ({
-        activeRides: state.activeRides.map(r => r.id === data.id ? { ...r, ...data, status: 'COMPLETED' } : r)
+        activeRides: state.activeRides.map(r => (r.id === rideId || (r as any)._id === rideId) ? { ...r, ...data, status: 'COMPLETED' } : r)
       }));
       toast.success('Ride completed! You arrived at your destination.', { icon: '🏁' });
 
