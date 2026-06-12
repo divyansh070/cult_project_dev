@@ -24,7 +24,7 @@ const io = new Server(httpServer, {
   },
 });
 
-mongoose.connect(process.env.MONGO_URI as string)
+mongoose.connect((process.env.MONGODB_URI || process.env.MONGO_URI) as string)
   .then(() => console.log('Connected to MongoDB via Mongoose'))
   .catch(err => console.error('MongoDB connection error:', err));
 app.use(cors({ origin: process.env.FRONTEND_URL || '*' }));
